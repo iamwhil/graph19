@@ -69,6 +69,14 @@ Lets find out.
 
 -- d postgresql | Sets the date to today.  Haha, oh me.  Uses postgres as our database for this engine.
 
+Making a new component?  How about doing that thing everyone loves doing?  Delete some things you don't need!  And if you need them, bring them back!
+
+* app/controllers
+* app/helpers
+* app/views
+* app/mailers
+* app/assets
+
 ### Mounting a component - The Booter.
 
 The main application's Gemfile needs to include the the engine.  
