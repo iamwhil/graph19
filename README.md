@@ -117,3 +117,10 @@ initializer :append_migrations do |app|
   end
 end
 ```
+
+### Concerns.
+
+Concern: Something that worries you: Ethan "That person on Tinder is really hot... but they could be crazy."
+
+Concerns add functionality from one component into another.  If you're adding functionality into a model, create the concern in models/concerns/class_name.rb.  Similarily for services, mailers, etc.
+
