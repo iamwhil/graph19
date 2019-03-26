@@ -23,7 +23,7 @@ It is probably best to use RVM for this.  www.rvm.io
 * 6) Install Rails.  Because this is a beta-version we need to get the pre-release gem
 `gem install rails --prerelease`
 * 7) Creating a new app instead of using this as a starting point? `rails new some_fancy_name`
-* 7 better) Git this app!
+* 7) Better - Git this app!
 * 8) Make sure your .ruby-version and .ruby-gemset files are set (ruby version 2.6.2) (gemset graph19).
 
 ## Ruby 2.6.2
