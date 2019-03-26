@@ -11,5 +11,16 @@ module Users
       end
     end
 
+    class << self
+
+      # ConcernDirectory uses this array to determine which concerns to include
+      def inclusions
+        [
+          Users::Concerns::Post
+        ]
+      end
+
+    end
+
   end
 end

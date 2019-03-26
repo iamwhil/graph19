@@ -60,6 +60,19 @@ So how do we do this?
 
 Lets find out.
 
+### Some files you will need.
+Al created two classes that we need, the booter and the ConcernDirectory.
+These need to be in the /lib folder.
+
+Include the following lines in the Gemfile:
+```
+# Require the booter
+require File.dirname(__FILE__) + '/lib/booter'
+
+# Require the conern directory
+require File.dirname(__FILE__) + '/lib/concern_directory'
+``` 
+
 ### Creating a component
 
 `rails plugin new components/COMPONENT_NAME --mountable -T -d postgresql`
@@ -71,10 +84,7 @@ Lets find out.
 
 Making a new component?  How about doing that thing everyone loves doing?  Delete some things you don't need!  And if you need them, bring them back!
 
-* app/controllers
-* app/helpers
 * app/views
-* app/mailers
 * app/assets
 
 ### Mounting a component - The Booter.
@@ -85,15 +95,17 @@ The main application's Gemfile needs to include the the engine.
 
 This will load the component.  It will first require the components lib/component_name.rb and then the lib/component_name/engine.rb.
 
-What if we have LOTS of components?  Well then lets make a Booter. 
+What if we have LOTS of components?  Well then lets include the Booter. 
 
-The booter can have an array of the components that you want to run for a given app.  And then in the Gemfile:
+The Booter can have an array of the components that you want to run for a given app.  And then in the Gemfile:
 
 ```
 Booter.app.components.each do |comp|
   gem comp.name, path: comp.path
 end
 ```
+
+See the booter.rb file.  Thanks Al.
 
 ### Migrations.
 
@@ -124,3 +136,27 @@ Concern: Something that worries you: Ethan "That person on Tinder is really hot.
 
 Concerns add functionality from one component into another.  If you're adding functionality into a model, create the concern in models/concerns/class_name.rb.  Similarily for services, mailers, etc.
 
+To use the concern we need to include the concern in the model.  
+
+For example:
+
+```
+class Post < ActiveRecord::Base
+  include Users::Concerns::Post
+...
+```
+
+However doing so now has coupled our components together.  They are no longer siloed.  If we delete the Users component, the Post is still going to try to include it and EXPLODE! :fire:
+
+So to get around this we have the ConcernDirectory by Al.  
+`ConcernDirectory.inclusions(self).each{ |ext| include ext }` which we can include in the model.
+
+This essentially looks at the booter, finds all the components that we have and then inspects their engines to find the inclusions.  It then includes these files in the model.
+
+```
+class Post < ActiveRecord::Base
+  ConcernDirectory.inclusions(self).each{ |ext| include ext }
+...
+```
+
+@todo : Graph calls into other components.

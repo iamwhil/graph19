@@ -1,6 +1,6 @@
 class CreateCommentTable < ActiveRecord::Migration[6.0]
   def change
-    create_table :comment_tables do |t|
+    create_table :comments do |t|
       t.references :post
     end
   end

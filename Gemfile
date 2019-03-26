@@ -1,7 +1,17 @@
+# Require the booter
+require File.dirname(__FILE__) + '/lib/booter'
+
+# Require the conern directory
+require File.dirname(__FILE__) + '/lib/concern_directory'
+
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.6.2'
+
+Booter.app.components.each do |comp|
+  gem comp.name, path: comp.path
+end
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.0.0.beta3'
@@ -60,6 +70,3 @@ end
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 gem 'graphiql-rails', group: :development
-
-
-gem 'users', path: 'components/users'
