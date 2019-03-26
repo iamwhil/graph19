@@ -38,9 +38,17 @@ This will be changed to 6.0 as soon as we can!  But no sooner.  Time is such a f
 
 GraphQL 1.8 + and in parictular 1.9 does away with the old Types setup of the old 1.7 days.  They were horrible and dark days. This app will utilize 1.9.3 so that we can define GraphQL class types with ruby syntax instead! So much better!
 
-## Engines
+## Postgres - the database!
 
-### Justification. Because if we're going to use engines instead of just micro-services and separate apps for everything - I should explain why.
+Lets use postgres.  Because Heroku did!  Hahaha oh me. Because its more stable than SQLite and we run it with relative ease on AWS RDS.
+
+## Engines / Components
+
+We're gonna call them components because a bunch of components will make up our application.
+
+### Justification. 
+
+Because if we're going to use engines instead of just micro-services and separate apps for everything - I should explain why.
 
 Pairin (www.pairin.com) does some fantastic things with engines.  It builds multiple apps from 1 codebase.  WHich keeps duplication of code to a bare minimum. Yay. The booter picks which components to load and builds apps based on the application environment.  This means that we can have an application that serves up data to one set of users, and another application which allows for the altering of the data.  Users on the read only version can try to post to the graph to edit data but the endpoint will not exist!  Yay for security.  There is no way around this, the end point simply does not exist to edit things in the app.
 
@@ -51,3 +59,53 @@ Yes we do we also can keep functionality siloed in the components.  If we don't 
 So how do we do this?
 
 Lets find out.
+
+### Creating a component
+
+`rails plugin new components/COMPONENT_NAME --mountable -T -d postgresql`
+-- mountable | will add namespace isolation to the engine. (and some other stuff --full would do.. app directory, config/routes.rb/ lib/component_name/engine.rb, etc.)
+
+-- T | skips the test files. We'll use RSPEC and hop throught the tests with a test_suite.sh
+
+-- d postgresql | Sets the date to today.  Haha, oh me.  Uses postgres as our database for this engine.
+
+### Mounting a component - The Booter.
+
+The main application's Gemfile needs to include the the engine.  
+
+`gem 'components_name', path: 'path_to_component'`
+
+This will load the component.  It will first require the components lib/component_name.rb and then the lib/component_name/engine.rb.
+
+What if we have LOTS of components?  Well then lets make a Booter. 
+
+The booter can have an array of the components that you want to run for a given app.  And then in the Gemfile:
+
+```
+Booter.app.components.each do |comp|
+  gem comp.name, path: comp.path
+end
+```
+
+### Migrations.
+
+Rails documentation suggests that you copy all of the migrations from the engine into the application's db/migrations directory.  What if you have lots of migrations?  Fun a command that will copy all of them over! bin/rails railties:install:migrations.  How convenient!  And when you don't need that component anymore and you delete it?  Go in and hand pick the migrations and remove them!  Yay you've successfully un-de-coupled the components!  
+
+Lets not do that. 
+
+Instead we mesh all the migrations together and run them in timestamp order.  Then if we delete a component - the migration is gone.  Its artifacts will still be in the database but new database instances will not have the artifacts.
+
+Add this to the component's engine.rb file.
+
+Source: https://content.pivotal.io/blog/leave-your-migrations-in-your-rails-engines
+
+```
+# allows migrations to be accessible at root
+initializer :append_migrations do |app|
+  unless app.root.to_s.match root.to_s
+    config.paths["db/migrate"].expanded.each do |expanded_path|
+      app.config.paths["db/migrate"] << expanded_path
+    end
+  end
+end
+```
