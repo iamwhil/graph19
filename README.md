@@ -34,7 +34,7 @@ Because it is new and fun.  And way faster than 2.4.2 our old loyal friend. (It 
 
 This will be changed to 6.0 as soon as we can!  But no sooner.  Time is such a fickle thing.
 
-GraphQL 1.9.3
+## GraphQL 1.9.3
 
 GraphQL 1.8 + and in parictular 1.9 does away with the old Types setup of the old 1.7 days.  They were horrible and dark days. This app will utilize 1.9.3 so that we can define GraphQL class types with ruby syntax instead! So much better!
 
