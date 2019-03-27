@@ -100,8 +100,8 @@ What if we have LOTS of components?  Well then lets include the Booter.
 The Booter can have an array of the components that you want to run for a given app.  And then in the Gemfile:
 
 ```
-Booter.app.components.each do |comp|
-  gem comp.name, path: comp.path
+Booter.app.components.each do |component|
+  gem component.name, path: component.path
 end
 ```
 
@@ -160,3 +160,7 @@ class Post < ActiveRecord::Base
 ```
 
 @todo : Graph calls into other components.
+
+@todo : RSPEC and runner.
+
+@todo : can we add the inclusions in active record?
