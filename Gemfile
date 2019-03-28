@@ -38,6 +38,10 @@ gem 'graphql'
 # Postgres
 gem 'pg'
 
+# rerun allows you to reload the server when files are changed in target directories.
+# eg. bundle exec rerun --background --dir ./ --pattern '{**/*.rb}' rails s
+gem 'rerun'
+
 # Use Active Storage variant
 # gem 'image_processing', '~> 1.2'
 
