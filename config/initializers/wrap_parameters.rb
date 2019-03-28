@@ -12,3 +12,6 @@ end
 # ActiveSupport.on_load(:active_record) do
 #   self.include_root_in_json = true
 # end
+
+# if you try to do another model first (say, post) then descendants isn't available yet.  Calling ApplicationRecord forces the models to be required..not great, but it works!
+ApplicationRecord
