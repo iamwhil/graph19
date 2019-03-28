@@ -15,12 +15,12 @@ ActiveRecord::Schema.define(version: 2019_03_26_201334) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "comments", force: :cascade do |t|
-    t.bigint "post_id"
-    t.index ["post_id"], name: "index_comments_on_post_id"
+  create_table "blog_comments", force: :cascade do |t|
+    t.bigint "blog_post_id"
+    t.index ["blog_post_id"], name: "index_blog_comments_on_blog_post_id"
   end
 
-  create_table "posts", force: :cascade do |t|
+  create_table "blog_posts", force: :cascade do |t|
     t.string "title", null: false
     t.integer "user_id", null: false
   end

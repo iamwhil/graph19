@@ -76,6 +76,7 @@ require File.dirname(__FILE__) + '/lib/concern_directory'
 ### Creating a component
 
 `rails plugin new components/COMPONENT_NAME --mountable -T -d postgresql`
+
 -- mountable | will add namespace isolation to the engine. (and some other stuff --full would do.. app directory, config/routes.rb/ lib/component_name/engine.rb, etc.)
 
 -- T | skips the test files. We'll use RSPEC and hop throught the tests with a test_suite.sh
@@ -83,6 +84,19 @@ require File.dirname(__FILE__) + '/lib/concern_directory'
 -- d postgresql | Sets the date to today.  Haha, oh me.  Uses postgres as our database for this engine.
 
 Making a new component?  How about doing that thing everyone loves doing?  Delete some things you don't need!  And if you need them, bring them back!
+
+### Cleaning up the creation
+
+The creation of the component will create quite a few files and do some things you don't want done.
+
+A. Remove `gem 'gem_name', path 'components/gem_name'` from the Gemfile. We'll do this with the booter (Below).
+
+B. Alter the [gemname].gemspec to contain valid information and no TODO's.
+
+C. Include any gems that you need in the [gemname].gemspec
+
+D. Using Graph? Create a `graphql/[gemname]` folder in the components app/ folder.  The /[gemname] will allow us to name space our graph objects.
+* create query_types and types folder in the `graphql/[gemname]` folder.
 
 * app/views
 * app/assets

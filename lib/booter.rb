@@ -3,7 +3,7 @@ class Booter
   APPS = {
     graph19: {
       root: 'graph19',
-      components: %w(users)
+      components: %w(blog users)
     }
   }.freeze
 

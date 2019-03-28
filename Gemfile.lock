@@ -1,4 +1,10 @@
 PATH
+  remote: components/blog
+  specs:
+    blog (0.1.0)
+      rails (~> 6.0.0.beta3)
+
+PATH
   remote: components/users
   specs:
     users (0.1.0)
@@ -212,6 +218,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  blog!
   bootsnap (>= 1.4.1)
   byebug
   capybara (>= 2.15)
