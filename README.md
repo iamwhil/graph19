@@ -331,6 +331,32 @@ The ConcernDirectory again will look for concerns from the inclusions specified 
 ...
 ```
 
+Sample Query: 
+```
+query{
+  post(id:1) {
+    id
+    user(id:1){
+      name
+    }
+  }
+}
+```
+
+response:
+```
+{
+  "data": {
+    "post": {
+      "id": 1,
+      "user": {
+        "name": "Fred"
+      }
+    }
+  }
+}
+```
+
 @todo : RSPEC and runner.
 
 @todo : can we add the inclusions in active record?
