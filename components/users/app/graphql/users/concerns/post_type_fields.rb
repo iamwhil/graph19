@@ -9,14 +9,16 @@ module Users
         field :user, ::Users::Types::UserType, null: false do 
           description "User for a given post."
           argument :id, Integer, required: true
+          argument :name, String, required: true
         end
       end
 
-      def user(id:)
-        ::Users::User.find(id)
+      def user(args)
+        puts "Args #{args.inspect}" #arguments? Yea... args.
+        puts "Context #{context.inspect}" #Context? Set it and forget.. remember it.
+        puts "Object #{object.inspect}" #Object we're playing with (post).
+        object.user
       end
-
-      puts 'Triggered'
 
     end
   end

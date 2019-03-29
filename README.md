@@ -295,18 +295,21 @@ module Users
         field :user, ::Users::Types::UserType, null: false do 
           description "User for a given post."
           argument :id, Integer, required: true
+          argument :name, String, required: true
         end
       end
 
-      def user(id:)
-        ::Users::User.find(id)
+      def user(args)
+        puts "Args #{args.inspect}" #arguments? Yea... args.
+        puts "Context #{context.inspect}" #Context? Set it and forge.. remember it.
+        puts "Object #{object.inspect}" #Object we're playing with (post).
+        object.user
       end
-
-      puts 'Triggered'
 
     end
   end
 end
+
 ```
 
 * Note the `ROOT = "Blog::Types::PostType"` - without it the concern will try to add itself to PostTypeFields over in the Blog::Types... which does not exist.  We've added 'Fields' so we know what we're adding to the post type.  Just teh compooter is stoopid and does knot know what w'ere trying tod o.
@@ -342,7 +345,7 @@ Sample Query:
 query{
   post(id:1) {
     id
-    user(id:1){
+    user(id:1,name:"Tom"){
       name
     }
   }
