@@ -1,4 +1,4 @@
-# README
+# README... ReadMe... Read Me.
 
 This README would normally document whatever steps are necessary to get the
 application up and running.
@@ -11,7 +11,7 @@ This one has a picture of a turtle.
        `/_/====/_/-'\_\
         ""     ""    ""
 ```
-Graph19 is a test bed for the newest components of a rails application in March 2019 using Rails 6, graphql-ruby 1.9+, Ruby 2.6.2, RSpec, and application composition by components.
+Graph19 is a test bed for the newest components of a rails application in March 2019 using Rails 6, graphql-ruby 1.9+, Ruby 2.6.2, RSpec, and application composition via components.
 
 ## Setup 
 
@@ -60,7 +60,7 @@ Pairin (www.pairin.com) does some fantastic things with engines.  It builds mult
 
 Okay so there are otherways to do this without all the fancy engine stuff... with graph itself.  Do we gain anything else?
 
-Yes we do we also can keep functionality siloed in the components.  If we don't want the application to be able to do something, we just don't include that component.  Or what if we want to add some crazy new feature?  We can keep all the logic for it in the component, no spaghetti code or logic where it does not belong.  So what if that crazy new feature was horrible?  Delete the component, and clean up is done.
+Yes we do, we also can keep functionality siloed in the components.  If we don't want the application to be able to do something, we just don't include that component.  Or what if we want to add some crazy new feature?  We can keep all the logic for it in the component, no spaghetti code or logic where it does not belong.  So what if that crazy new feature was horrible?  Delete the component, and clean up is done.
 
 So how do we do this?
 
@@ -129,7 +129,7 @@ See the booter.rb file.  Thanks Al.
 
 ### Migrations.
 
-Rails documentation suggests that you copy all of the migrations from the engine into the application's db/migrations directory.  What if you have lots of migrations?  Fun a command that will copy all of them over! bin/rails railties:install:migrations.  How convenient!  And when you don't need that component anymore and you delete it?  Go in and hand pick the migrations and remove them!  Yay you've successfully un-de-coupled the components!  
+Rails documentation suggests that you copy all of the migrations from the engine into the application's db/migrations directory.  What if you have lots of migrations?  Fun - a command that will copy all of them over! bin/rails railties:install:migrations.  How convenient!  And when you don't need that component anymore and you delete it?  Go in and hand pick the migrations and remove them!  Yay you've successfully un-de-coupled the components!  
 
 Lets not do that. 
 
@@ -278,7 +278,7 @@ module Blog
 end
 ```
 
-This will query our post just fine.  But what about the user?  Well we could add a user field to the post_type that references the Users component's user type.  But ... remember that whole separate but equal thing?  Injustice.  So here we just keep our components separate.
+This will query our post just fine.  But what about the user?  Well we could add a user field to the post_type that references the Users component's user type.  But ... remember that whole separate but equal thing?  Injustice.  So here we just keep our components and all their bits siloed.
 
 So lets build a concern over in the users component that adds the user field to the post type.
 
