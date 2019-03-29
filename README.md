@@ -11,7 +11,7 @@ This one has a picture of a turtle.
        `/_/====/_/-'\_\
         ""     ""    ""
 ```
-Graph19 is a test bed for the newest components of a rails application in March 2019.
+Graph19 is a test bed for the newest components of a rails application in March 2019 using Rails 6, graphql-ruby 1.9+, Ruby 2.6.2, RSpec, and application composition by components.
 
 ## Setup 
 
