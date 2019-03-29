@@ -2,7 +2,7 @@ module Users
   module Concerns
     module Post
       extend ActiveSupport::Concern
-      ROOT = 'Post'
+      ROOT = 'Blog::Post'
 
       included do
         belongs_to :user, class_name: "Users::User"

@@ -2,6 +2,8 @@ module Blog
   module Types
     class PostType < ::Types::BaseObject
       description "A blog post."
+      ::ConcernDirectory.inclusions(self).each{ |ext| include ext }
+
       field :id, Integer, null: false
       field :title, String, null:false
       field :trunacated_preview, String, null: false

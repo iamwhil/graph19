@@ -96,7 +96,7 @@ B. Alter the [gemname].gemspec to contain valid information and no TODO's.
 C. Include any gems that you need in the [gemname].gemspec
 
 D. Using Graph? Create a `graphql/[gemname]` folder in the components app/ folder.  The /[gemname] will allow us to name space our graph objects.
-* create query_types and types folder in the `graphql/[gemname]` folder.
+* create `concerns`, `query_types` and `types` folders in the `graphql/[gemname]` folder.
 
 * app/views
 * app/assets
@@ -144,9 +144,9 @@ initializer :append_migrations do |app|
 end
 ```
 
-### Concerns.
+### Model Concerns.
 
-Concern: Something that worries you: Ethan "That person on Tinder is really hot... but they could be crazy."
+Concern: Something that worries you: Ethan "That person on Tinder is really hot probably a model... but they could be crazy."
 
 Concerns add functionality from one component into another.  If you're adding functionality into a model, create the concern in models/concerns/class_name.rb.  Similarily for services, mailers, etc.
 
@@ -167,13 +167,169 @@ So to get around this we have the ConcernDirectory by Al.
 
 This essentially looks at the booter, finds all the components that we have and then inspects their engines to find the inclusions.  It then includes these files in the model.
 
+Example.
+
+We have 2 components, the users and the blog!  Blog posts will belong to a user.  But we don't want anything in the blog component to be hard coded and tied to the users component.  
+
+In the users' engine we include the concerns that link to the posts component.
+
+
 ```
+# components/users/lib/users/engine.rb
+
+...
+  def inclusions
+    [
+      Users::Concerns::Post
+    ]
+  end
+```
+
+In the post model within the blog component we add our ConcernDirectory functionality.
+
+```
+# components/blog/app/models/blog/post.rb 
+
 class Post < ActiveRecord::Base
   ConcernDirectory.inclusions(self).each{ |ext| include ext }
 ...
 ```
 
-@todo : Graph calls into other components.
+Over in the user's component we create a concern for the post.
+
+```
+# components/users/app/users/models/concerns/post.rb
+module Users
+  module Concerns
+    module Post
+      extend ActiveSupport::Concern
+      ROOT = 'Blog::Post'
+
+      included do
+        belongs_to :user, class_name: "Users::User"
+      end
+
+      def hello
+        puts "hello"
+      end
+
+    end
+
+  end
+end
+```
+
+At this point the post model has a belongs_to user relation and a #hello method. Success.
+
+### Graph Concerns
+
+What's the point of all this segregation if we can't get the graph to play along?  Well we can.  Basically we'll always be adding fields to types (GraphQL objects).
+
+This follows almost the same structure as the model concerns.  However we've adopted a slightly different file and naming structure to keep things right in our heads. And we all like being right in the head, no one likes missing marbles.  Those go in our mouths.
+
+So lets lead with another example.
+
+We still have the blog and users components.  We have a post, and we want to be able to query for the user it belongs to.
+
+So we'll assume we have our basic post_type returned by our post_query_type.
+
+```
+# components/blog/app/grapql/blog/query_types/post_query_type.rb
+module Blog
+  module QueryTypes
+    module PostQueryType
+      extend ActiveSupport::Concern
+
+      included do 
+        field :post, ::Blog::Types::PostType, null: true do
+          argument :id, Integer, required: true
+        end
+      end
+
+      def post(id:)
+        ::Blog::Post.find(id)
+      end
+
+    end
+  end
+end
+```
+
+```
+# components/blog/app/graphql/blog/types/post_type.rb
+module Blog
+  module Types
+    class PostType < ::Types::BaseObject
+      description "A blog post."
+
+      field :id, Integer, null: false
+      field :title, String, null:false
+      field :trunacated_preview, String, null: false
+      field :comments, [::Blog::Types::CommentType], null: true, 
+        description: "This post's comments, or null if this post has comments disabled."
+    end
+  end
+end
+```
+
+This will query our post just fine.  But what about the user?  Well we could add a user field to the post_type that references the Users component's user type.  But ... remember that whole separate but equal thing?  Injustice.  So here we just keep our components separate.
+
+So lets build a concern over in the users that adds the user to the post.
+
+```
+# components/users/app/graphql/users/concerns/post_type_fields.rb
+module Users
+  module Concerns
+    module PostTypeFields
+      extend ActiveSupport::Concern
+      ROOT = "Blog::Types::PostType"
+
+      included do
+
+        field :user, ::Users::Types::UserType, null: false do 
+          description "User for a given post."
+          argument :id, Integer, required: true
+        end
+      end
+
+      def user(id:)
+        ::Users::User.find(id)
+      end
+
+      puts 'Triggered'
+
+    end
+  end
+end
+```
+
+* Note the `ROOT = "Blog::Types::PostType"` - without it the concern will try to add itself to PostTypeFields over in the Blog::Types... which does not exist.  We've added the fields so we know what we're adding to the post type.  Just teh compooter is stoopid and does knot know what w'ere trying tod o.
+
+Now that we have our concern we need to tie it into our PostType.
+
+```
+# components/blog/app/graphql/blog/types/post_type.rb
+module Blog
+  module Types
+    class PostType < ::Types::BaseObject
+      description "A blog post."
+      ::ConcernDirectory.inclusions(self).each{ |ext| include ext }
+...
+```
+
+The ConcernDirectory again will look for concerns from the inclusions specified in the engine.rb files for components included in the booter.
+
+```
+# components/users/lib/users/engine.rb
+...
+  def inclusions
+    [
+      Users::Concerns::Post,
+      Users::Concerns::PostTypeFields
+    ]
+  end
+...
+```
 
 @todo : RSPEC and runner.
 

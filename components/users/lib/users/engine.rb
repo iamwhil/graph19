@@ -16,7 +16,8 @@ module Users
       # ConcernDirectory uses this array to determine which concerns to include
       def inclusions
         [
-          Users::Concerns::Post
+          Users::Concerns::Post,
+          Users::Concerns::PostTypeFields
         ]
       end
 
