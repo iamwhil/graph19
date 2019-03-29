@@ -3,8 +3,14 @@
 This README would normally document whatever steps are necessary to get the
 application up and running.
 
-This one does not. Sukka.
-
+This one has a picture of a turtle.
+```                 __
+         .,-;-;-,. /'_\
+       _/_/_/_|_\_\) /
+     '-<_><_><_><_>=/\
+       `/_/====/_/-'\_\
+        ""     ""    ""
+```
 Graph19 is a test bed for the newest components of a rails application in March 2019.
 
 ## Setup 
@@ -227,7 +233,7 @@ What's the point of all this segregation if we can't get the graph to play along
 
 This follows almost the same structure as the model concerns.  However we've adopted a slightly different file and naming structure to keep things right in our heads. And we all like being right in the head, no one likes missing marbles.  Those go in our mouths.
 
-So lets lead with another example.
+So lets gain understanding with another example.
 
 We still have the blog and users components.  We have a post, and we want to be able to query for the user it belongs to.
 
@@ -274,7 +280,7 @@ end
 
 This will query our post just fine.  But what about the user?  Well we could add a user field to the post_type that references the Users component's user type.  But ... remember that whole separate but equal thing?  Injustice.  So here we just keep our components separate.
 
-So lets build a concern over in the users that adds the user to the post.
+So lets build a concern over in the users component that adds the user field to the post type.
 
 ```
 # components/users/app/graphql/users/concerns/post_type_fields.rb
@@ -303,7 +309,7 @@ module Users
 end
 ```
 
-* Note the `ROOT = "Blog::Types::PostType"` - without it the concern will try to add itself to PostTypeFields over in the Blog::Types... which does not exist.  We've added the fields so we know what we're adding to the post type.  Just teh compooter is stoopid and does knot know what w'ere trying tod o.
+* Note the `ROOT = "Blog::Types::PostType"` - without it the concern will try to add itself to PostTypeFields over in the Blog::Types... which does not exist.  We've added 'Fields' so we know what we're adding to the post type.  Just teh compooter is stoopid and does knot know what w'ere trying tod o.
 
 Now that we have our concern we need to tie it into our PostType.
 
@@ -359,4 +365,4 @@ response:
 
 @todo : RSPEC and runner.
 
-@todo : can we add the inclusions in active record?
+@todo : can we add the inclusions in active record? See PMac's PR
