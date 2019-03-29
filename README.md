@@ -146,7 +146,7 @@ end
 
 ### Model Concerns.
 
-Concern: Something that worries you: Ethan "That person on Tinder is really hot probably a model... but they could be crazy."
+Concern: Something that worries you: Ethan "That person on Tinder is really hot and probably a model... but they could be crazy."
 
 Concerns add functionality from one component into another.  If you're adding functionality into a model, create the concern in models/concerns/class_name.rb.  Similarily for services, mailers, etc.
 
