@@ -366,6 +366,68 @@ response:
 }
 ```
 
+## RSpec - Regular Spectacular!
+
+I assume that's what that stands for.
+
+So lets say we want to run some tests because our name is not Sebastian.
+
+The first thing we need to do is include RSpec at a high level, so lets do that in our Gemfile.  And lets live dangerously and not specify a version.  (As we're still in rails 6 beta when rails 6 comes out an official release for rspec-rails may follow.  We want to specify that in the future.)
+
+```
+group :development, :test do
+  # ...
+  gem 'rspec-rails'
+end
+```
+That was easy!  Because we're not done.
+
+Now in the individual components we need to require RSpec.  Lets do that in our specfiles.
+
+```
+# components/component/component.gemspec 
+spec.add_development_dependency "rspec-rails"
+```
+
+Now we're done.  Gotcha! 
+
+Install rspec by running `rails g rspec:install` in the component's root directory.  This will create the spec folder, spec_helper.rb and rails_helper.rb.
+
+Next we need to make sure that the engine is utilizing rspec when generating things. Eg models. Eg. dinosaurs.
+
+In the engine.rb we can specify our test framework for the generators.
+
+```
+# engine.rb
+config.generators do |generator|
+  generator.test_framework :rspec
+end
+```
+
+If you're one of those people who uses `rails generate model ...` now your rspec tests will be generated as well.  If you're a cool kid you probably build these files by hand.  Don't forgt your tests!
+
+### Dummy.
+
+So RSpec does this thing where it basically runs against a dummy application.  We can get this to work when generating our component with `--dummy-app=spec/dummy`.  This basically builds an entire application in spec/dummy.  Its huge.  And for as many components as you have you'll have this dummy application.
+
+We're big fans of playing in the ocean / pool / rivers / ponds, while other people are fans of keeping things DRY.  So to keep the "oh I can't get wet" people happy, lets not have x number dummy apps.  Lets have one dummy-application at [rails-root]/spec/dummy.  Basically this is a copy of the dummy app.
+
+This dummy app does not know about the components right off hand, they need to be required.  When loaded in individual components the application.rb file will `require gem-name`.  We want to do this dynamically.
+
+In the application.rb in the dummy app `require gem-name` has been replaced with `require ENV['TEST_ENGINE']`. 
+
+Inside of the rails_helper.rb file for each component's specs we need to set the gem-name. 
+
+```
+# component/spec/rails_helper.rb
+require 'spec_helper'
+ENV['RAILS_ENV'] ||= 'test'
+ENV['TEST_ENGINE'] = 'component name' # <--- right there!
+require File.expand_path('../../../../spec/dummy/config/environment', __FILE__)
+...
+```
+
+
 @todo : RSPEC and runner.
 
 @todo : can we add the inclusions in active record? See PMac's PR
