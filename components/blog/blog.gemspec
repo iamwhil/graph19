@@ -28,4 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rails", "~> 6.0.0.beta3"
 
   spec.add_development_dependency "postgres"
+
+  # Testing
+  spec.add_development_dependency "rspec-rails"
 end
