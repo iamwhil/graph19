@@ -500,6 +500,72 @@ Phew that is a lot of work. Lets take a break with a picture of a duck.
 
 ### How about we run all the tests!
 
+There are some cleaner ways we could go about this utilzing ruby to run our files.  But for the sake of time we're gonna hijack Al's runner.
+
+At the app's core we need to include the test_suite.sh file.
+```
+#!/bin/bash
+
+trap "exit" INT
+
+result=0
+
+cd "$( dirname "${BASH_SOURCE[0]}" )"
+
+for test_script in $(find . -name test_runner.sh); do
+  echo `dirname $test_script`
+  if [ "$2" != "" ] && [ "./$2" != `dirname $test_script` ]
+  then
+    continue
+  fi
+
+  pushd `dirname $test_script` > /dev/null
+  chmod +x ./test_runner.sh
+  if [ "$1" == "ci" ]; then
+    ./test_runner.sh ci $3
+  else
+    ./test_runner.sh main $3
+  fi
+
+  ((result+=$?))
+  popd > /dev/null
+done
+
+if [ $result -eq 0 ]; then
+  tput setaf 2;
+  echo "==================== SUCCESS ===================="
+  echo "          You will be showered in riches         "
+else
+  tput setaf 1;
+  echo "=====================  FAILURE  ===================="
+  echo "You have brought shame upon yourself and your family"
+fi
+
+exit $result
+```
+
+Then in each component's root we need to have a test_runner.sh
+
+```
+#!/bin/bash
+
+exit_code=0
+
+echo "**Running container specs**"
+if [ "$1" == "ci" ]; then
+  bundle check --path=../../vendor/bundle || bundle install --path=../../vendor/bundle --jobs=4 --retry=3
+else
+  bundle check || bundle install
+fi
+
+bundle exec rspec spec
+exit_code+=$?
+
+exit $exit_code
+```
+
+Now running `./test_suite.sh` from the app's root directory will run all tests in each of the components.
+
 @todo : RSPEC and runner.
 
 @todo : can we add the inclusions in active record? See PMac's PR
