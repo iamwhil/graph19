@@ -404,7 +404,7 @@ config.generators do |generator|
 end
 ```
 
-If you're one of those people who uses `rails generate model ...` now your rspec tests will be generated as well.  If you're a cool kid you probably build these files by hand.  Don't forgt your tests!
+If you're one of those people who uses `rails generate model ...` now your rspec tests will be generated as well.  If you're a cool kid you probably build these files by hand - don't forget your tests!
 
 ### Dummy.
 
@@ -484,6 +484,18 @@ Shoulda::Matchers.configure do |config|
   end
 end
 ...
+```
+Now we're talk'n.  Well at least inter-componently.
+
+Phew that is a lot of work. Lets take a break with a picture of a duck.
+```
+      ,~~.
+     (  9 )-_,
+(\___ )=='-'
+ \ .   ) )
+  \ `-' /
+   `~j-'
+     "=:
 ```
 
 ### How about we run all the tests!
