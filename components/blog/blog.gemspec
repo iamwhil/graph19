@@ -31,4 +31,5 @@ Gem::Specification.new do |spec|
 
   # Testing
   spec.add_development_dependency "rspec-rails"
+  spec.add_development_dependency "shoulda"
 end

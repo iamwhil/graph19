@@ -372,7 +372,7 @@ I assume that's what that stands for.
 
 So lets say we want to run some tests because our name is not Sebastian.
 
-The first thing we need to do is include RSpec at a high level, so lets do that in our Gemfile.  And lets live dangerously and not specify a version.  (As we're still in rails 6 beta when rails 6 comes out an official release for rspec-rails may follow.  We want to specify that in the future.)
+The first thing we need to do is include RSpec at a high level, so lets do that in our Gemfile.  Lets live dangerously and not specify a version.  (As we're still in rails 6 beta when rails 6 comes out an official release for rspec-rails may follow.  We want to specify that in the future.)
 
 ```
 group :development, :test do
@@ -382,7 +382,7 @@ end
 ```
 That was easy!  Because we're not done.
 
-Now in the individual components we need to require RSpec.  Lets do that in our specfiles.
+Now in the individual components we need to require RSpec.  Lets do that in our gemspec files.
 
 ```
 # components/component/component.gemspec 
@@ -410,9 +410,9 @@ If you're one of those people who uses `rails generate model ...` now your rspec
 
 So RSpec does this thing where it basically runs against a dummy application.  We can get this to work when generating our component with `--dummy-app=spec/dummy`.  This basically builds an entire application in spec/dummy.  Its huge.  And for as many components as you have you'll have this dummy application.
 
-We're big fans of playing in the ocean / pool / rivers / ponds, while other people are fans of keeping things DRY.  So to keep the "oh I can't get wet" people happy, lets not have x number dummy apps.  Lets have one dummy-application at [rails-root]/spec/dummy.  Basically this is a copy of the dummy app.
+To keep the "oh I can't get wet" people happy - lets have one dummy-application at [rails-root]/spec/dummy.  Basically this is a copy of the dummy app.
 
-This dummy app does not know about the components right off hand, they need to be required.  When loaded in individual components the application.rb file will `require gem-name`.  We want to do this dynamically.
+This dummy app does not know about the components right off hand, they need to be required.  When a dummy app exists for each component its application.rb file will `require gem-name`.  We want to do this dynamically in our universal dummy app.
 
 In the application.rb in the dummy app `require gem-name` has been replaced with `require ENV['TEST_ENGINE']`. 
 
@@ -420,13 +420,73 @@ Inside of the rails_helper.rb file for each component's specs we need to set the
 
 ```
 # component/spec/rails_helper.rb
-require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
 ENV['TEST_ENGINE'] = 'component name' # <--- right there!
 require File.expand_path('../../../../spec/dummy/config/environment', __FILE__)
 ...
 ```
 
+### I can't hear you! -Every test to every component.
+
+At this point we can run tests in individual components.  Go ahead try. I dare you.  From the component `bundle exec rspec spec`.  See I told you so.
+
+However, if the tests reference ANY other ANYTHING from ANY other component.  Everything starts to fall apart.
+
+To get the tests to recognise other components we have to do a couple things.
+
+First in the Gemfile of the test, require the other component.  This is the only place where we hard code references to other components.  Perhaps we could utilize the ConcernDirectory here, but the booter would need to have an app that requires ALL of the components.  So for now we'll specify them 1 at a time in the Gemfile.
+
+```
+# Example: Will include the blog engine in the users component.
+# components/users/Gemfile
+...
+gem 'blog', path: "../blog"
+...
+```
+
+Now we can test our concerns.  In the individual concern tests we need to include the concern into the base class.  We don't do this dynamically so that we don't force validations/associations/functions we may not want on the base class.
+
+```
+# components/users/spec/models/concerns/post_spec.rb
+require 'rails_helper'
+
+::Blog::Post.include Users::Concerns::Post
+
+describe ::Blog::Post do 
+...
+```
+
+### Making things easier with shoulda.
+
+The shoulda matchers add quite a bit of ease to testing ActiveRecord validations and relations.  So lets use them!
+
+First include the shoulda matches in the component's .gemspec file.
+
+```
+#components/component/component.gemspec
+Gem::Specification.new do |spec|
+...
+spec.add_development_dependency "shoulda" # put me somewhere pretty.
+```
+
+Now in the rails helper lets require the shoulda matchers and configure them. If we don't things will break. Like your dreams of running tests.
+
+```
+#components/component/spec/rails_helper.rb
+...
+# somewhere after the abort line
+require 'shoulda/matchers'
+
+Shoulda::Matchers.configure do |config|
+  config.integrate do |with|
+    with.test_framework :rspec
+    with.library :rails 
+  end
+end
+...
+```
+
+### How about we run all the tests!
 
 @todo : RSPEC and runner.
 
