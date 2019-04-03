@@ -421,7 +421,7 @@ end
 ```
 Note! The resolve's return value is a hash of the fields.
 
-The graphql/mutations.rb file explicitly includes mutations into the schema (once we include the mutations in the base graph).
+The component/mutations.rb file explicitly includes mutation fields into the schema (once we include the mutations in the base graph).
 
 ```
 # components/users/app/graphql/users/mutations.rb
@@ -441,6 +441,7 @@ At this point we have the mutation and it should be created, but it is not in ou
 
 In our root mutations type we include the mutations we want.
 ```
+# app/graphql/mutation_type.rb
 class MutationType < Types::BaseObject
 
   field :test_field, String, null: false,
@@ -454,9 +455,11 @@ class MutationType < Types::BaseObject
 end
 ```
 
-Here we see two things.  One a field directly included on the Mutation Type.  This field would show up in EVERY schema for every app we launch from this code base.  This is probably a bad idea and will never be the case.  So lets not do this.
+Here we see two things.  
 
-The second thing we see is the `include Users::Mutations`.  This could be pulled in with the ConcernDirectory so we don't hard code it.  Here in this example we're explicitly including it to illustrate what is going on.  We're including the Users::Mutations defined at `components/users/app/graphql/users/mutations.rb`. 
+One - a field directly included on the Mutation Type.  This field would show up in EVERY schema for every app we launch from this code base.  This is probably a bad idea and will never be the case.  So lets not do this.
+
+Two - the `include Users::Mutations`.  This could be pulled in with the ConcernDirectory so we don't hard code it.  Here in this example we're explicitly including it to illustrate what is going on.  We're including the Users::Mutations defined at `components/users/app/graphql/users/mutations.rb`. 
 
 What a good illustration.  I'm a regular Bob Ross.
 
@@ -464,7 +467,7 @@ What a good illustration.  I'm a regular Bob Ross.
 
 What if you would really really like to test the mutation? What if that mutations resolve block gets HUGE?  Well in either case its much easier to keep things small, and testable by using a resolver.
 
-A resolver is basically just a class that does the resolution for us.  We can create a resolver for our rename_user_mutation.rb (eerily similar to update_user_mutation... but with a resolver.  OoOoOooO...)
+A resolver is basically just a class that does the resolution for us.  We can create a resolver for our rename_user_mutation.rb (eerily similar to update_user_mutation... but with a resolver.  OoOoOooO... eerie)
 
 First take a look at your resolve clause.
 ```
@@ -533,7 +536,7 @@ A couple things. 1. 2. Done.
 
 A. You're probably thinking that was a silly thing to do... 3 lines into a 37 line class?!  Agreed.  But what if it was not 3 lines, what if it was LOTS of lines ... like 5... and included lots of complicated and convoluted logic?  Well now a resolver is looking pretty good.  It cleans up your muatation and you can test it!
 
-B. "But... coulnd't you previously call the resolve / resolve_field with a proc? Why don't you do that now?!"  Fair enough.  If you have a work flow with resolvers you're calling with a proc God speed.  Have fun.  However I really like this approach because there is no black magic with the `(obj, args, ctx)` being passed to .call and you get a shiney initializer!
+B. "But... coulnd't you previously call the resolve / resolve_field with a proc? Why don't you do that now?!"  Fair enough.  If you have a work flow with resolvers you're calling with a proc God speed.  Have fun.  However I really like this approach because there is no black magic with the `(obj, args, ctx)` implicitly being passed to .call and you get a shiney initializer!
 
 ## RSpec - Regular Spectacular!
 
