@@ -4,5 +4,5 @@ class Schema < GraphQL::Schema
 
   orphan_types []
 
-  rescue_from(ActiveRecord::RecordNotFound) { "Not There!" }
+  rescue_from(ActiveRecord::RecordNotFound) { "Unable to find that record!" }
 end
