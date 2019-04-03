@@ -367,6 +367,174 @@ response:
 }
 ```
 
+### Mutations - now the turtle makes sense!
+
+Mutations are quite a bit more involved than queries but their implementation is a bit simpler.
+There is a bit of setup to get mutations to work accordingly.
+Within each component you will want to create 1) a graphql/mutations folder and a graphql/mutations.rb file.
+
+First we should create the base mutation type all other mutations will inherit from.
+
+```
+# app/graphql/mutations/base_mutation.rb
+# We could also inherit from GraphQL::Schema::RelayClassicMutation to integrate with
+# Relay.  Look at the documentation for more info.  We don't need to do this.
+# https://graphql-ruby.org/mutations/mutation_classes
+
+class Mutations::BaseMutation < GraphQL::Schema::Mutation
+  # This is used for generating payload types
+  object_class Types::BaseObject
+
+  # This is used for return fields on the mutation's payload
+  field_class Types::BaseField
+
+  # This is used for generating the 'input: { ... }' object type.
+  # I'd rather pass in arguments instead of some sort of input hash, so we don't do this.
+  # input_object_class Types::BaseInputObject
+end
+```
+
+Next lets make a mutation! What a splendid time for an example!
+
+```
+# components/users/app/graphql/users/mutations/update_user_mutation.rb
+module Users
+  module Mutations
+    class UpdateUserMutation < ::Mutations::BaseMutation # The inheritance!
+      null true
+
+      argument :id, ID, required: true
+      argument :name, String, required: false
+
+      field :user, Types::UserType, null: true
+
+      def resolve(id:, name:)
+        user = ::Users::User.find(id)
+        user.update_attributes(name: name)
+        {
+          user: user
+        }
+      end
+    end
+  end
+end
+```
+Note! The resolve's return value is a hash of the fields.
+
+The graphql/mutations.rb file explicitly includes mutations into the schema (once we include the mutations in the base graph).
+
+```
+# components/users/app/graphql/users/mutations.rb
+module Users
+  module Mutations
+    extend ActiveSupport::Concern
+
+    included do 
+      field :update_user, mutation: ::Component::Mutations::UpdateUserMutation
+    end
+
+  end
+end
+```
+
+At this point we have the mutation and it should be created, but it is not in our schema!  To include it in our schema we need to include the component's mutations into the base mutation type (the entry point for mutations). 
+
+In our root mutations type we include the mutations we want.
+```
+class MutationType < Types::BaseObject
+
+  field :test_field, String, null: false,
+    description: "An example field added by the generator"
+  def test_field
+    "Hello World"
+  end
+
+  include Users::Mutations
+
+end
+```
+
+Here we see two things.  One a field directly included on the Mutation Type.  This field would show up in EVERY schema for every app we launch from this code base.  This is probably a bad idea and will never be the case.  So lets not do this.
+
+The second thing we see is the `include Users::Mutations`.  This could be pulled in with the ConcernDirectory so we don't hard code it.  Here in this example we're explicitly including it to illustrate what is going on.  We're including the Users::Mutations defined at `components/users/app/graphql/users/mutations.rb`. 
+
+What a good illustration.  I'm a regular Bob Ross.
+
+### Resolvers
+
+What if you would really really like to test the mutation? What if that mutations resolve block gets HUGE?  Well in either case its much easier to keep things small, and testable by using a resolver.
+
+A resolver is basically just a class that does the resolution for us.  We can create a resolver for our rename_user_mutation.rb (eerily similar to update_user_mutation... but with a resolver.  OoOoOooO...)
+
+First take a look at your resolve clause.
+```
+def resolve(id:, name:)
+  user = ::Users::User.find(id)
+  user.update_attributes(name: name)
+  {
+    user: user
+  }
+end
+```
+
+Next move the resolution block logic to a new class and refactor at your leisure!
+
+```
+# components/users/app/graphql/users/resolvers/rename_user_mutation_resolver.rb
+module Users
+  module Resolvers
+    class RenameUserMutationResolver
+
+      attr_accessor :user
+
+      def initialize(obj, args, ctx)
+        @obj = obj
+        @args = args.to_h
+        @ctx = ctx
+      end 
+
+      def call
+        find_user
+        rename_user
+        return_result
+      end
+
+      private 
+
+        def find_user
+          @user = User.find(@args[:id])
+        end
+
+        def rename_user
+          @user.update(name: @args[:name])
+        end
+
+        def return_result
+          {
+            user: @user
+          } 
+        end
+
+    end
+  end
+end
+```
+
+Back in the mutation instead of resolving with our little resolve block we can use our new fancy resolver!
+
+```
+# rename_user_mutation.rb
+def resolve(args)
+  ::Users::Resolvers::RenameUserMutationResolver.new(object, args, context).call
+end
+```
+
+A couple things. 1. 2. Done.
+
+A. You're probably thinking that was a silly thing to do... 3 lines into a 37 line class?!  Agreed.  But what if it was not 3 lines, what if it was LOTS of lines ... like 5... and included lots of complicated and convoluted logic?  Well now a resolver is looking pretty good.  It cleans up your muatation and you can test it!
+
+B. "But... coulnd't you previously call the resolve / resolve_field with a proc? Why don't you do that now?!"  Fair enough.  If you have a work flow with resolvers you're calling with a proc God speed.  Have fun.  However I really like this approach because there is no black magic with the `(obj, args, ctx)` being passed to .call and you get a shiney initializer!
+
 ## RSpec - Regular Spectacular!
 
 I assume that's what that stands for.
@@ -566,7 +734,5 @@ exit $exit_code
 ```
 
 Now running `./test_suite.sh` from the app's root directory will run all tests in each of the components.
-
-@todo : RSPEC and runner.
 
 @todo : can we add the inclusions in active record? See PMac's PR

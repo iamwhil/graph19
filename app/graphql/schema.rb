@@ -1,5 +1,5 @@
 class Schema < GraphQL::Schema
-  mutation(Types::MutationType)
+  mutation(MutationType)
   query(QueryType)
 
   orphan_types []
