@@ -1,7 +1,6 @@
-#require_relative 'lib/concern_directory.rb'
 module Blog
   class Post < ApplicationRecord
-    ::ConcernDirectory.inclusions(self).each{ |ext| include ext }
+    #::ConcernDirectory.inclusions(self).each{ |ext| include ext }
 
     validates_presence_of :title
 
