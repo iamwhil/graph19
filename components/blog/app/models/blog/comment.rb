@@ -1,5 +1,5 @@
 module Blog
-  class Comment < ActiveRecord::Base
+  class Comment < ApplicationRecord
 
     belongs_to :post
     
