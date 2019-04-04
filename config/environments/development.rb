@@ -28,6 +28,15 @@ Rails.application.configure do
     config.cache_store = :null_store
   end
 
+  config.eager_load_paths += Dir["#{Rails.root}/components/users/app/models/*.rb"]
+  Rails.application.reloader.to_prepare do 
+    Dir["#{Rails.root}/components/users/app/models/*.rb"].each {|file| require_dependency file} 
+  end   
+
+   config.eager_load_paths += Dir["#{Rails.root}/components/blog/app/models/*.rb"]
+  Rails.application.reloader.to_prepare do 
+    Dir["#{Rails.root}/components/blog/app/models/*.rb"].each {|file| require_dependency file} 
+  end  
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
