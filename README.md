@@ -738,4 +738,36 @@ exit $exit_code
 
 Now running `./test_suite.sh` from the app's root directory will run all tests in each of the components.
 
+### What about that resolver test?
+
+Oh yea! Good memory.  Now that we have a functional test suite we can also test our resolvers.  The example resolver test below tests the update user name resolver from the before time.
+
+```
+# components/users/spec/resolvers/rename_user_mutation_resolver_spec.rb
+require 'rails_helper'
+
+module Users
+  module Resolvers
+    describe RenameUserMutationResolver  do
+
+      context "When a new user name is passed in" do
+        it "should update the user's name." do
+          user = ::Users::User.create(name: "Scrappy")
+          expect(user.name).to eq("Scrappy")
+          args = {id: user.id, name: "Scooby"}
+          resolver = RenameUserMutationResolver.new(nil, args, nil).call
+          user.reload
+          expect(user.name).to eq("Scooby")
+          expect(resolver[:user][:name]).to eq("Scooby")
+        end
+      end
+    end
+
+  end
+end
+```
+
+The major things to note here are the `resolver = ` and teh resolver response.  Make sure to create a new resolver with the expected parameters (object, arguments, context) and the fields in the resolver after called will be the fields specified in the resolver.
+
+
 @todo : can we add the inclusions in active record? See PMac's PR
